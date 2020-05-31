@@ -9,7 +9,7 @@ import { UserLogin, UserLoginReturn, TokenPayload } from "../schemas/auth";
  * @summary verify the user credentials and return an session token id
  * @param {Context} ctx
  * @param {UserLogin} args
- * @returns {UserLoginReturn}
+ * @returns {UserLoginReturn} an token id and a session id
  */
 export const login = async (
   ctx: Context,

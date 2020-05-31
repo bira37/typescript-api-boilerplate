@@ -7,7 +7,7 @@ import { UserCreation } from "../schemas/user";
  * @function createUser
  * @summary creates and return the user
  * @param {UserCreation} args
- * @returns {DBUser}
+ * @returns {DBUser} the created user
  */
 export const createUser = async (
   ctx: Context,
