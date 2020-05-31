@@ -1,0 +1,24 @@
+{
+  "buildOnSave": false,
+  "compileOnSave": true,
+  "compilerOptions": {
+    "sourceMap": true,
+    "target": "es2018",
+    "module": "commonjs",
+    "outDir": "./dist/",
+    "allowJs": true,
+    "pretty": true,
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "lib": ["es2019"],
+    "moduleResolution": "node",
+    "noUnusedParameters": false, 
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "strictFunctionTypes": false,
+    "noUnusedLocals": true
+  },
+  "include": ["src", "tests"],
+  "exclude": ["node_modules", "dist"]
+}

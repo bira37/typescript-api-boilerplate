@@ -1,0 +1,76 @@
+image: node:12-alpine
+
+stages:
+  - check
+  - test
+  - build
+  - deploy
+
+NPM Audit:
+  stage: check
+  allow_failure: true
+  script:
+    - npm audit
+
+Lint:
+  stage: check
+  script:
+    - npm ci
+    - npm run lint
+
+Prettier:
+  stage: check
+  script:
+    - npm ci
+    - npm run prettier
+
+Type Check:
+  stage: check
+  script:
+    - npm ci
+    - npm run type-check
+
+Test:
+  stage: test
+  services:
+    - postgres:12-alpine
+  variables:
+    POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+    - cat <<END > .env
+    - DATABASE_URL=postgres://postgres:postgres@postgres:5432
+    - JWT_SECRET=secret
+    - JWT_EXPIRATION=1d
+    - END
+    - npm ci
+    - npm test
+
+Build:
+  stage: build
+  only:
+    - master
+  image: docker
+  services:
+    - docker:dind
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build --pull --build-arg NODE_ENV=production -t $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG-$CI_PIPELINE_ID -f deploy/Dockerfile.api .
+    - docker push $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG-$CI_PIPELINE_ID
+
+Deploy Heroku:
+  stage: deploy
+  only:
+    - master
+  image: docker
+  services:
+    - docker:dind
+  before_script:
+    - apk add --update curl && rm -rf /var/cache/apk/*
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG-$CI_PIPELINE_ID
+    - docker login --username=_ --password=$HEROKU_API_KEY registry.heroku.com
+    - docker tag $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG-$CI_PIPELINE_ID registry.heroku.com/$HEROKU_APP_NAME/web
+    - docker push registry.heroku.com/$HEROKU_APP_NAME/web
+    - docker inspect --format="{{.Id}}" registry.heroku.com/$HEROKU_APP_NAME/web > dockerid.txt
+    - curl -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME/formation -H "Authorization:Bearer $HEROKU_AUTH_TOKEN" -H "Content-Type:application/json" -H "Accept:application/vnd.heroku+json;version=3.docker-releases" -d '{"updates":[{"type":"web","docker_image":"'"$(cat dockerid.txt)"'"}]}'

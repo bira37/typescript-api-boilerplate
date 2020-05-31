@@ -1,0 +1,6 @@
+node_modules/
+.env
+docs/
+coverage/
+dist/
+build/
