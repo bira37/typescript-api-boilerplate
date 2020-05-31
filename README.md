@@ -87,9 +87,15 @@ You can store migrations on the _migrations/migrations.ts_ file. They are automa
 
   * During the tests, two test users are created with different privileges. You can use them to make calls that needs authentication. Check the existing tests to see how you can use them.
 
+### Dockerfile
+
+A Dockerfile can be found on _deploy_ folder. You can use it on the root directory to create a dockerized instance of the API. This Dockerfile is used to build the deploy image on the GitLab CI file.
+
 ### The GitLab CI File
 
 A GitLab CI configuration file is also available. It contains a complete pipeline with Lint, Prettier and Type checks, a test stage, a build stage (to build the docker image that will be deployed) and a deploy stage on Heroku Platform. If you want to use it, make sure you add the needed CI variables on your GitLab Repository and the environment variables needed to run the server on Heroku.
+
+
 
 ### Observations
 
